@@ -10,12 +10,21 @@ An autonomous, multi-agent trading system running 24/7 on a home server. LLMs dr
 
 All 60+ scripts in this project were written by Claude Code across ~150 iterative sessions. The owner directed the work — defining strategies, setting risk parameters, identifying what wasn't working, and making every capital allocation decision. Claude Code handled the implementation.
 
+A key part of the owner's contribution was continuously identifying where manual processes could be automated and where existing workflows had gaps:
+
+- Recognised that running bots across three exchanges with no unified risk layer was fragile — led to the multi-agent pipeline with a central risk manager and execution agent
+- Identified that overnight Windows/Linux updates could disrupt live trading — designed the full overnight maintenance system (active hours, auto-login, startup notifications)
+- Spotted that ad-hoc Telegram noise from 15+ scripts was making the signal-to-noise ratio unusable — systematically silenced non-critical alerts and redesigned morning/evening reports
+- Noticed that idle capital sitting in SOL between trades was a missed opportunity — introduced Marinade liquid staking to put it to work
+- Recognised that a single bad API response (Jupiter price feed) could corrupt displayed PnL — rerouted balance reads to the bot's own DB-written state
+- Identified that paper bots graduating to live needed a formal gate — introduced the profitable-sessions canary system before full capital deployment
+
 | Model | Role | Examples |
 |-------|------|---------|
 | **Claude Opus** | Architecture, strategy design | Multi-agent pipeline, risk framework, Marinade mSOL staking, Allora worker node, Kelly sizing, convergence gate |
 | **Claude Sonnet** | Bots, signals, infrastructure | Individual scripts, crontab, systemd services, PostgreSQL schema, Telegram reporting, dashboard, auto-update system |
 
-This is a working example of the human-AI collaboration model: market knowledge and product direction from the owner, engineering execution from Claude.
+This is a working example of the human-AI collaboration model: process thinking and product direction from the owner, engineering execution from Claude.
 
 ---
 
