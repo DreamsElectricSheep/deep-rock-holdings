@@ -2,41 +2,20 @@
 
 An autonomous, multi-agent trading system running 24/7 on a home server. LLMs drive signal scoring, trade decisions, and natural-language reporting. Real capital is deployed across three exchanges with no human in the loop during market hours.
 
-> Built and iterated over ~150 sessions — **all code written by Claude Code** (Opus for architecture and strategy, Sonnet for implementation). The vision, strategy direction, capital allocation decisions, and domain expertise belong entirely to the founder.
+> Built over ~150 sessions — strategies, architecture, and direction by the owner; all code written by Claude Code (Opus for big-picture design, Sonnet for implementation).
 
 ---
 
 ## Built with Claude Code
 
-This project is a real-world demonstration of what's possible when a founder with deep market intuition partners with Claude Code to build production infrastructure.
-
-**Not a prototype. Not a demo.** This system runs 24/7 with real capital deployed across three exchanges. The founder conceived the strategies, made every capital allocation decision, defined the risk parameters, and drove the product direction across ~150 iterative sessions. Claude Code handled the implementation — translating those decisions into working software.
-
-### The Founder's Role
-
-Deep Rock Holdings was built by someone who understood markets before writing a single line of code. The founder:
-
-- **Conceived the overall architecture** — the idea of a multi-agent pipeline where specialised agents handle ingestion, scoring, risk, and execution came from a clear vision of how institutional trading desks operate
-- **Defined every strategy** — RSI thresholds, EMA windows, ATR multipliers, drawdown limits, Kelly fractions, regime gates, and signal weightings were all founder decisions based on market knowledge
-- **Made all capital allocation decisions** — which exchanges, which assets, which position sizes, when to go live vs. stay paper
-- **Directed each session with precision** — identified what wasn't working (e.g. Whisper Trader losing −61%), diagnosed why, and dictated the replacement approach
-- **Evaluated every output** — reviewed live system state (Telegram logs, DB queries, service statuses) each session and approved or redirected before anything was deployed
-- **Provided the domain expertise** — DeFi mechanics, Solana/Jupiter DEX behaviour, Marinade liquid staking, SEC 13F filing interpretation, options VRP harvesting, ORB liquidity sweep patterns
-
-### How Claude Code Was Used
-
-Claude Code (Opus and Sonnet) served as the engineering arm — writing all 60+ scripts, managing the full stack, and handling every implementation detail the founder directed:
+All 60+ scripts in this project were written by Claude Code across ~150 iterative sessions. The owner directed the work — defining strategies, setting risk parameters, identifying what wasn't working, and making every capital allocation decision. Claude Code handled the implementation.
 
 | Model | Role | Examples |
 |-------|------|---------|
-| **Claude Opus** | Architecture, complex strategy implementation | Multi-agent pipeline design, risk framework, Marinade mSOL staking integration, Allora worker node, Kelly criterion sizing, convergence gate |
-| **Claude Sonnet** | Bot scripting, signal modules, infrastructure | Individual bot scripts, crontab management, systemd services, PostgreSQL schema, Telegram reporting, dashboard, overnight auto-update system |
+| **Claude Opus** | Architecture, strategy design | Multi-agent pipeline, risk framework, Marinade mSOL staking, Allora worker node, Kelly sizing, convergence gate |
+| **Claude Sonnet** | Bots, signals, infrastructure | Individual scripts, crontab, systemd services, PostgreSQL schema, Telegram reporting, dashboard, auto-update system |
 
-Across ~150 sessions, Claude Code:
-- Translated founder strategy decisions into production Python across 60+ scripts
-- Diagnosed and fixed production bugs against live system state
-- Managed the full stack — Solana RPC, Jupiter DEX API, Coinbase Advanced Trade, Alpaca, SEC EDGAR, WSL2, systemd, PostgreSQL, Windows registry
-- Committed and deployed every change to a live, capital-deployed system
+This is a working example of the human-AI collaboration model: market knowledge and product direction from the owner, engineering execution from Claude.
 
 ---
 
