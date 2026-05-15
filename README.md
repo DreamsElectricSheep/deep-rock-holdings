@@ -19,7 +19,7 @@ This project is a real-world demonstration of what's possible when Claude Code i
 | **Claude Opus** | Architecture, strategy, big-picture design | Multi-agent pipeline design, risk framework, Marinade mSOL staking integration, Allora worker node setup, drawdown halt logic, Kelly criterion sizing, convergence gate architecture |
 | **Claude Sonnet** | Implementation, bots, infrastructure | Individual bot scripts, signal layer modules, crontab management, systemd services, PostgreSQL schema, Telegram reporting, dashboard Flask app, overnight auto-update system |
 
-### What Claude Code did across ~30 sessions
+### What Claude Code did across ~150 sessions
 
 - **Designed the multi-agent architecture from scratch** — five coordinated agents with distinct roles, shared state via PostgreSQL, and clean handoffs between ingestion → analysis → risk → supervision → execution
 - **Diagnosed and fixed production bugs in real time** — including a three-session saga to fix Coinbase market buy orders, a WSL2 VM instability root cause, and a Jupiter API price caching bug that caused wrong balance display
