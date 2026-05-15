@@ -1,6 +1,6 @@
 # Deep Rock Holdings — Algorithmic Hedge Fund Infrastructure
 
-An autonomous, multi-agent trading system running 24/7 on a home server. LLMs drive signal scoring, trade decisions, and natural-language reporting. Real capital is deployed across three exchanges with no human in the loop during market hours.
+An autonomous, multi-agent trading system running 24/7 on a home server. LLMs drive signal scoring, trade decisions, and natural-language reporting. Real capital is deployed across three exchanges — with human oversight mechanisms at every layer and no unattended exposure beyond defined risk limits.
 
 > Built over ~150 sessions — strategies, architecture, and direction by the owner; all code written by Claude Code (Opus for big-picture design, Sonnet for implementation).
 
@@ -24,7 +24,7 @@ A key part of the owner's contribution was continuously identifying where manual
 | **Claude Opus** | Architecture, strategy design | Multi-agent pipeline, risk framework, Marinade mSOL staking, Allora worker node, Kelly sizing, convergence gate |
 | **Claude Sonnet** | Bots, signals, infrastructure | Individual scripts, crontab, systemd services, PostgreSQL schema, Telegram reporting, dashboard, auto-update system |
 
-This is a working example of the human-AI collaboration model: process thinking and product direction from the owner, engineering execution from Claude.
+The approach throughout was empirical — strategies were validated in paper mode before any real capital was committed, bots were iterated based on observed behaviour rather than assumptions, and each session started with live system evidence before any changes were made. This is a working example of the human-AI collaboration model: process thinking and product direction from the owner, engineering execution from Claude.
 
 ---
 
@@ -95,7 +95,7 @@ Gemini is embedded throughout the pipeline — not as a chatbot, but as a scorin
 
 ### Autonomous Operation
 
-The system is designed to run indefinitely without manual intervention:
+The system is designed to run indefinitely without manual intervention — but autonomy is bounded, not unconditional. Hard limits exist at every layer: position sizing gates on VIX regime, drawdown halts block new entries at −20%, circuit breakers trigger on extreme sentiment, and a Telegram killswitch gives the owner immediate override at any time. The system reports on itself daily so a human always has a clear picture of what it's doing and why.
 
 - **Market hours:** Bots execute, signals refresh, risk manager gates position sizing
 - **3:00 AM:** Windows Update auto-installs patches; reboots only in the overnight window
@@ -147,7 +147,7 @@ Continuous intelligence feeds that all agents and bots read from:
 
 ## Risk & Guardian Layer
 
-Hard stops that override everything else:
+The system's ability to operate autonomously with real capital depends on these controls being trustworthy. They aren't an afterthought — they were designed in from the start, and most of the iteration across 150 sessions has been in making them more reliable, not more permissive.
 
 | Module | Trigger | Action |
 |--------|---------|--------|
