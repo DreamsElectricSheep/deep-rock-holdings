@@ -2,7 +2,7 @@
 
 An autonomous, multi-agent trading system running 24/7 on a home server. LLMs drive signal scoring, trade decisions, and natural-language reporting. Real capital is deployed across three exchanges with no human in the loop during market hours.
 
-> **Every line of code in this repository was written by Claude Code.** Built and iterated over ~30 sessions as a solo project — no human-authored code, no copy-pasted boilerplate. Claude Opus handled system architecture, multi-agent pipeline design, and complex strategy logic. Claude Sonnet handled bot implementation, signal scripting, bug fixes, and infrastructure automation. The operator directed; Claude built.
+> **Every line of code in this repository was written by Claude Code.** Built and iterated over ~150 sessions as a solo project — no human-authored code, no copy-pasted boilerplate. Claude Opus handled system architecture, multi-agent pipeline design, and complex strategy logic. Claude Sonnet handled bot implementation, signal scripting, bug fixes, and infrastructure automation. The operator directed; Claude built.
 
 ---
 
