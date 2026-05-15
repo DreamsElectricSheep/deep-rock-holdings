@@ -4,6 +4,8 @@ An autonomous, multi-agent trading system running 24/7 on a home server. LLMs dr
 
 > Built over ~150 sessions — strategies, architecture, and direction by the owner; all code written by Claude Code (Opus for big-picture design, Sonnet for implementation).
 
+> **Note:** This public repository was created May 15, 2026. The project has been running privately since early 2026 — this repo was put together to share a curated overview of the architecture and approach. The full codebase remains in a private repository.
+
 ---
 
 ## Built with Claude Code
