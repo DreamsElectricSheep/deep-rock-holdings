@@ -8,6 +8,23 @@ An autonomous, multi-agent trading system running 24/7 on a home server. LLMs dr
 
 ---
 
+---
+
+## Development Log
+
+*Recent sessions — vague by design; proprietary parameters and thresholds remain private.*
+
+| Date | Work |
+|------|------|
+| Jun 2026 | **Intelligence Triad Migration.** Social layer rebuilt as resilient three-vector system after unauthenticated Reddit feed went permanently dark: X/Twitter cashtag scanning with rolling statistical velocity baselines; institutional RVOL anomaly tracking feeding deterministic position-sizing multipliers; StockTwits velocity scoring replacing binary platform checks. Each vector degrades gracefully. |
+| Jun 2026 | **Board of Rivals adversarial audit.** 7 production mandates implemented and verified: LLMs demoted from voters to feature extractors, no-silent-fallback rule, Pydantic v2 validation firewall, fee-floor guardrails, blind self-healing prohibited, position reconciliation + orphan detection. |
+| May 2026 | **X/Twitter authentication layer.** Full re-architecture of cookie management; HttpOnly constraint identified as architectural root cause of prior auth failures; paste-form workflow deployed for manual refresh. |
+| May 2026 | **Whale Watcher + supervisor integration.** Pro-rated real-time RVOL tracking added; whale_confidence multiplier wired into Kelly sizing. Scan universe bug (always-empty dict) identified and fixed. |
+| Apr 2026 | **Morning maintenance overhaul.** Daily self-healing scripts audited; parameter-override regression root-caused to cron conflict; tuned live trading values now protected from automatic resets. |
+| Apr 2026 | **Multi-agent pipeline hardening.** Capital accounting bug fixed in supervisor (Kelly sizing was cosmetic — hardcoded value was actually executing). Trade sizes now correctly Kelly-derived end-to-end. |
+| Mar 2026 | **13F Follower + earnings radar deployed.** 13F position copying with Kelly weighting; earnings proximity boost added to equity scoring pipeline. |
+
+
 ## Built with Claude Code
 
 All 60+ scripts in this project were written by Claude Code across ~150 iterative sessions. The owner directed the work — defining strategies, setting risk parameters, identifying what wasn't working, and making every capital allocation decision. Claude Code handled the implementation.
