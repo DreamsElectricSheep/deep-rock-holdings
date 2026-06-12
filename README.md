@@ -43,7 +43,7 @@ This is the core of the project — a five-agent pipeline where each agent has a
 
   Raw Signal Sources                  Processed Intelligence
   ──────────────────                  ──────────────────────
-  Reddit · X/Twitter                  ┌──────────────────────────────┐
+  X/Twitter cashtags                  ┌──────────────────────────────┐
   StockTwits · SEC EDGAR              │  data_ingestion_agent.py     │
   Firecrawl · Google Trends  ──────►  │  Aggregates all sources      │
   BTC order book · VIX                │  Deduplicates, normalises    │
@@ -51,11 +51,11 @@ This is the core of the project — a five-agent pipeline where each agent has a
                                                      │
                                       ┌──────────────▼───────────────┐
                                       │  strategy_analyst.py         │
-                                      │  Gemini scores each ticker   │
-                                      │  Composite: Minervini 40%    │
-                                      │  + Gemini confidence 35%     │
-                                      │  + social velocity 15%       │
-                                      │  + StockTwits 10%            │
+                                      │  Deterministic composite:    │
+                                      │  trend template + validated  │
+                                      │  LLM feature vectors +       │
+                                      │  social + stream velocity    │
+                                      │  (FOMO-penalised, gated)     │
                                       │  Crypto: confidence-weighted │
                                       └──────────────┬───────────────┘
                                                      │
@@ -83,17 +83,41 @@ This is the core of the project — a five-agent pipeline where each agent has a
 
 ### How LLMs Are Used
 
-Gemini is embedded throughout the pipeline — not as a chatbot, but as a scoring and reasoning engine:
+Gemini is embedded throughout the pipeline — not as a chatbot, but as a structured data-extraction engine. As of the June 2026 board mandate (see *The Board of Rivals* below), no LLM output reaches execution math without passing a strict validation schema, and no LLM anywhere in the system holds trade-decision authority:
 
 | Where | Model | What it does |
 |-------|-------|-------------|
-| `strategy_analyst.py` | Gemini 3.1 Flash Lite | Scores each equity ticker with a confidence rating and investment thesis. One of four inputs to the composite score. |
+| `strategy_analyst.py` | Gemini 3.1 Flash Lite | Consumes validated feature vectors from upstream extraction. Composite scoring is fully deterministic — no LLM votes exist in the execution path. |
 | `SocialIntelligenceService.py` | Gemini 3.1 Flash Lite | Reads aggregated social data (Reddit + Trends + Firecrawl) and outputs BULLISH / BEARISH / NEUTRAL + impulse score for crypto sentiment. |
 | `equity_screener.py` | Gemini 3.1 Flash Lite | Generates investment thesis for LONG_EXPLOSION and SHORT_COLLAPSE candidates from fundamental data. |
 | `sec_watcher.py` | Gemini 3.1 Flash Lite | Reads SEC 8-K / 10-Q / 10-K filings and assigns an impact score (−10 to +10) with a plain-English summary. |
 | `nwbo_tracker.py` | Gemini 3.1 Flash Lite | On any significant price move or filing, explains why it's moving, rates it BULLISH / BEARISH / NEUTRAL, and assesses key risks. |
-| `data_ingestion_agent.py` | Gemini 3.1 Flash Lite | Batch-scores Reddit ticker mentions for confidence, momentum thesis, and signal quality. |
+| `data_ingestion_agent.py` | Gemini 3.1 Flash Lite | Extracts bounded, dimensionless feature vectors (narrative strength, priced-in probability, retail FOMO intensity, fundamental mention rate) from X/Twitter ticker discussion. |
 | Oracle (OpenClaw) | Gemini 3.1 Flash | Interactive AI agent monitoring the entire fleet. Answers natural-language questions about portfolio state, bot health, and market regime via Telegram. |
+
+### The Board of Rivals — Adversarial Architecture Audit (May–June 2026)
+
+In mid-2026 the owner convened an adversarial audit of the entire system: four AI personas with deliberately conflicting economic worldviews, operating under an **absolute unanimity constraint** — no mandate could issue unless all four agreed. The composition was chosen so that each member's blind spots are another member's specialty:
+
+| Archetype | Analytical Lens | What It Hunts |
+|-----------|----------------|---------------|
+| **The Macro-Keynesian** | Central-bank liquidity regimes, regulatory compliance, systemic capital allocation | Compliance risk; threats to the capital-preservation sleeve |
+| **The Austrian / Hard Money** | Counterparty vulnerability, asset custody, cash-drag, liquidity stress horizons | Hidden counterparty traps; idle capital decay |
+| **The Quant / Complexity Theorist** | Mathematical validity, statistical overfitting boundaries, transactional friction, race-condition topology | Curve-fitted backtest illusions; protocol fragility |
+| **The Behavioral Economist** | Market reflexivity, retail feedback loops, mania/panic cascades, operator fatigue | Automation bias; the system believing its own hype |
+
+The board's core finding became the system's governing principle: **absolute containment of LLM autonomy**. The resulting remediations, all implemented and verified in production:
+
+- **LLMs demoted from voters to feature extractors.** Gemini no longer outputs buy/sell opinions or confidence votes anywhere in the execution path. It extracts bounded, dimensionless features — narrative strength, probability the news is already priced in, retail FOMO intensity, fundamental mention rate — which feed deterministic, reproducible scoring formulas. Every trade score can be manually re-derived from logs.
+- **No silent fallbacks.** If structured features are missing or malformed, the signal scores zero and a loud alert fires. The legacy path that fell back to raw LLM confidence was deliberately killed: a signal fails, the process survives, and a human finds out.
+- **A validation firewall in front of the math.** Every LLM extraction passes through strict Pydantic v2 schema validation before touching execution logic — financial strings sanitised to numbers, categorical fields restricted to exact literals, all scores range-bounded. A hallucinated value raises a validation error and the signal is dropped, never traded.
+- **Micro-timeframe strategies decommissioned.** Sub-15-minute bots were retired as friction-dominated noise with no institutional edge.
+- **Fee-floor guardrails on live execution.** Entries are refused when the volatility-derived profit target cannot clear round-trip exchange fees with margin — paper environments with zero commissions had been flattering strategies that would lose money live.
+- **"Blind self-healing" prohibited.** A daily maintenance script was discovered silently resetting a hand-tuned live trading parameter back to its old default every morning — masquerading for weeks as a mystery regression. Healer scripts may now repair corrupted state but never override tuned parameters.
+- **Position reconciliation at every layer.** Bots reconcile their database state against actual exchange positions on startup, and a daily detector surfaces any exchange position no bot is tracking. Orphaned positions are escalated to a human — never auto-managed away.
+- **Multi-vector intelligence migration.** When the system's unauthenticated Reddit feed went permanently dark (HTTP 403 across all subreddits), the social layer was rebuilt as a resilient triad: X/Twitter cashtag scanning with rolling statistical velocity baselines, institutional relative-volume (RVOL) anomaly tracking feeding deterministic position-sizing multipliers, and continuous social-stream velocity replacing binary platform checks. Each vector degrades gracefully — a dropped interface fails its signal, never the process.
+
+A note on process: several of the board's own premises were **rejected on evidence** during implementation — proposed deletions that would have broken live components, capital figures that conflated bookkeeping with custody. Every mandate was verified against live system state before execution, which is itself the operating model: the adversarial layer proposes, the evidence disposes.
 
 ### Autonomous Operation
 
