@@ -18,4 +18,4 @@ def _load_secrets():
 _s = _load_secrets()
 TELEGRAM_TOKEN = _s['telegram_token']
 CHAT_ID        = _s['chat_id']
-DB_URL         = _s.get('db_url', 'postgres://quantadmin:quantadmin123@localhost:5432/marketdata')
+DB_URL         = _s['db_url']  # no fallback -- a missing value should fail loud, not connect somewhere silently
