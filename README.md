@@ -1,6 +1,6 @@
 # Deep Rock Holdings — Algorithmic Hedge Fund Infrastructure
 
-> **This is a public overview repo.** The trading system itself — signal logic, position sizing, risk parameters, the 100+ Python scripts that actually run — lives in a private repository and stays there. What's here documents the architecture and approach; it is not the code. See *Repository Note* at the bottom for why.
+> **This is a public overview repo.** The trading system itself — signal logic, position sizing, risk parameters, the 100+ Python scripts that actually run lives in a private repository. What's here documents the architecture and approach; it is not the code. See *Repository Note* at the bottom for why.
 
 An autonomous, multi-agent trading system running 24/7 on a home server. LLMs drive signal scoring, trade decisions, and natural-language reporting. Real capital is deployed across three exchanges — with human oversight mechanisms at every layer and no unattended exposure beyond defined risk limits.
 
