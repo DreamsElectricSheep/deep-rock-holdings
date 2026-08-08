@@ -1,10 +1,10 @@
 # Deep Rock Holdings — Algorithmic Hedge Fund Infrastructure
 
+> **This is a public overview repo.** The trading system itself — signal logic, position sizing, risk parameters, the 100+ Python scripts that actually run — lives in a private repository and stays there. What's here documents the architecture and approach; it is not the code. See *Repository Note* at the bottom for why.
+
 An autonomous, multi-agent trading system running 24/7 on a home server. LLMs drive signal scoring, trade decisions, and natural-language reporting. Real capital is deployed across three exchanges — with human oversight mechanisms at every layer and no unattended exposure beyond defined risk limits.
 
-> Built over ~150 sessions and counting — strategies, architecture, and direction by the owner; all code written by Claude Code (Opus for big-picture design, Sonnet for implementation).
-
-> **Note:** This public repository was created May 15, 2026. The project has been running privately since mid 2025 — this repo was put together to share a curated overview of the architecture and approach. The full codebase remains in a private repository, and stays that way — see *Repository Note* at the bottom for why.
+Strategy, architecture, and every decision are the owner's; Claude Code wrote and iterated the code across ~150 sessions (more on the Opus/Sonnet split below). This public repo was created May 15, 2026 to share that architecture — the project itself has been running privately since mid-2025.
 
 ---
 
@@ -14,11 +14,12 @@ An autonomous, multi-agent trading system running 24/7 on a home server. LLMs dr
 
 | | |
 |---|---|
-| Snapshot taken | 2026-08-07 |
-| Total commits | 210, since 2025-05-07 (13 straight weeks, none idle) |
-| Commits, last 30 days | 29 |
-| Active bot/agent/scanner scripts | 103 |
-| Tracked files (incl. timestamped `.bak` snapshots kept for audit trail) | 137 |
+| Snapshot taken | 2026-08-08 |
+| Commits (git-tracked) | 214 |
+| Commits, last 30 days | 32 |
+| Development history | ongoing since mid-2025; detailed git tracking began in 2026 |
+| Active bot/agent/scanner scripts | 104 |
+| Tracked files (incl. timestamped `.bak` snapshots kept for audit trail) | 138 |
 
 This project doesn't get "finished" and left alone — it gets audited. The Development Log below is the real change history, not a highlight reel; it includes the bugs found in the system's own governance layer, not just the wins.
 
@@ -56,7 +57,7 @@ This project doesn't get "finished" and left alone — it gets audited. The Deve
 
 ## Built with Claude Code
 
-100+ scripts in this project were written by Claude Code across ~150+ iterative sessions. The owner directed the work — defining strategies, setting risk parameters, identifying what wasn't working, and making every capital allocation decision. Claude Code handled the implementation.
+100+ scripts in this project were written by Claude Code across ~150+ iterative sessions. The owner directed the work — defining strategies, setting risk parameters, identifying what wasn't working, and making every capital allocation decision. Claude Code handled the implementation: Opus on the architecture and strategy design (the multi-agent pipeline, risk framework, Kelly sizing, the convergence gate), Sonnet on most of the day-to-day work — individual bots, signals, crontab, systemd services, the Postgres schema, Telegram reporting, the dashboard.
 
 A key part of the owner's contribution was continuously identifying where manual processes could be automated and where existing workflows had gaps:
 
@@ -68,12 +69,7 @@ A key part of the owner's contribution was continuously identifying where manual
 - Identified that paper bots graduating to live needed a formal gate — introduced the profitable-sessions canary system before full capital deployment
 - Recognised that "the audit found N issues and fixed them" isn't trustworthy on its own — introduced a forward-return measurement layer so every research signal is scored against what the market actually did next, not against the story told about it afterward
 
-| Model | Role | Examples |
-|-------|------|---------|
-| **Claude Opus** | Architecture, strategy design | Multi-agent pipeline, risk framework, Marinade mSOL staking, Allora worker node, Kelly sizing, convergence gate |
-| **Claude Sonnet** | Bots, signals, infrastructure | Individual scripts, crontab, systemd services, PostgreSQL schema, Telegram reporting, dashboard, auto-update system |
-
-The approach throughout was empirical — strategies were validated in paper mode before any real capital was committed, bots were iterated based on observed behaviour rather than assumptions, and each session started with live system evidence before any changes were made. This is a working example of the human-AI collaboration model: process thinking and product direction from the owner, engineering execution from Claude.
+The approach throughout was empirical — strategies were validated in paper mode before any real capital was committed, bots were iterated based on observed behaviour rather than assumptions, and each session started with live system evidence before any changes were made.
 
 ---
 
@@ -136,13 +132,13 @@ Gemini is embedded throughout the pipeline — not as a chatbot, but as a struct
 
 | Where | Model | What it does |
 |-------|-------|-------------|
-| `strategy_analyst.py` | Gemini 3.1 Flash Lite | Consumes validated feature vectors from upstream extraction. Composite scoring is fully deterministic — no LLM votes exist in the execution path. |
-| `SocialIntelligenceService.py` | Gemini 3.1 Flash Lite | Reads aggregated social data (X/Twitter + Trends + Firecrawl) and outputs BULLISH / BEARISH / NEUTRAL + impulse score for crypto sentiment. |
-| `equity_screener.py` | Gemini 3.1 Flash Lite | Generates investment thesis for LONG_EXPLOSION and SHORT_COLLAPSE candidates from fundamental data. |
-| `sec_watcher.py` | Gemini 3.1 Flash Lite | Reads SEC 8-K / 10-Q / 10-K filings and assigns an impact score (−10 to +10) with a plain-English summary. |
-| `nwbo_tracker.py` / `fda_analyzer.py` | Gemini 3.1 Flash Lite | Reads catalyst-relevant filings and community evidence for a capacity-constrained biotech-catalyst niche; the LLM extracts evidence, a deterministic rubric scores it — the model never assigns the odds itself. |
-| `data_ingestion_agent.py` | Gemini 3.1 Flash Lite | Extracts bounded, dimensionless feature vectors (narrative strength, priced-in probability, retail FOMO intensity, fundamental mention rate) from X/Twitter ticker discussion. |
-| Oracle (OpenClaw) | Gemini 3.1 Flash | Interactive AI agent monitoring the entire fleet. Answers natural-language questions about portfolio state, bot health, and market regime via Telegram. |
+| `strategy_analyst.py` | — (no LLM call) | Consumes validated feature vectors from upstream extraction. Composite scoring is fully deterministic — no LLM votes exist in the execution path. |
+| `SocialIntelligenceService.py` | Gemini 3.5 Flash Lite | Reads aggregated social data (X/Twitter + Trends + Firecrawl) and outputs BULLISH / BEARISH / NEUTRAL + impulse score for crypto sentiment. |
+| `equity_screener.py` | Gemini 3.5 Flash Lite | Generates investment thesis for LONG_EXPLOSION and SHORT_COLLAPSE candidates from fundamental data. |
+| `sec_watcher.py` | Gemini 3.5 Flash Lite | Reads SEC 8-K / 10-Q / 10-K filings and assigns an impact score (−10 to +10) with a plain-English summary. |
+| `nwbo_tracker.py` / `fda_analyzer.py` | Gemini 3.5 Flash Lite | Reads catalyst-relevant filings and community evidence for a capacity-constrained biotech-catalyst niche; the LLM extracts evidence, a deterministic rubric scores it — the model never assigns the odds itself. |
+| `data_ingestion_agent.py` | Gemini 3.5 Flash Lite | Extracts bounded, dimensionless feature vectors (narrative strength, priced-in probability, retail FOMO intensity, fundamental mention rate) from X/Twitter ticker discussion. |
+| Oracle (OpenClaw) | Gemini 3.5 Flash | Interactive AI agent monitoring the entire fleet. Answers natural-language questions about portfolio state, bot health, and market regime via Telegram. |
 
 ### The Board — Adversarial Architecture Audit, Now a Recurring Process
 
@@ -298,8 +294,8 @@ All reports auto-generated from live database state and delivered via Telegram:
 | OS | Windows 11 + WSL2 Ubuntu 22.04 (systemd enabled) |
 | Scheduler | Linux cron in WSL2 |
 | Database | PostgreSQL — bot state, trade history, signals, research |
-| AI (scripts) | Gemini 3.1 Flash Lite |
-| AI (Oracle) | Gemini 3.1 Flash — interactive agent via Telegram |
+| AI (scripts) | Gemini 3.5 Flash Lite (board audit pass runs Gemini 3.6 Flash) |
+| AI (Oracle) | Gemini 3.5 Flash — interactive agent via Telegram |
 | Monitoring | Live web dashboard (Flask) + Telegram alerts |
 | Secrets | `~/.config/deeprock/secrets.json` — zero credentials in repo, and as of this update, zero hardcoded fallback credentials in this repo either (see *Repository Note*) |
 
