@@ -15,7 +15,7 @@ An autonomous, multi-agent trading system running 24/7 on a home server. LLMs dr
 | | |
 |---|---|
 | Snapshot taken | 2026-08-07 |
-| Total commits | 210, since 2026-05-07 (13 straight weeks, none idle) |
+| Total commits | 210, since 2025-05-07 (13 straight weeks, none idle) |
 | Commits, last 30 days | 29 |
 | Active bot/agent/scanner scripts | 103 |
 | Tracked files (incl. timestamped `.bak` snapshots kept for audit trail) | 137 |
