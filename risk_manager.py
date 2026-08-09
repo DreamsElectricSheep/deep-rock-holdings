@@ -1,10 +1,10 @@
 #!/home/hedgefund/.openclaw/workspace/venv/bin/python3
 """
-Risk Manager — Deep Rock Holdings
+Risk Manager: Deep Rock Holdings
 Deterministic Python-only risk engine. No LLM calls.
 
 Runs every 15 min (cron) to update risk_state.json.
-Also importable as a module — call eval_trade() before any order.
+Also importable as a module; call eval_trade() before any order.
 
 Rules:
   ATR sizing   : risk 1% of capital per trade, stop at 2x ATR
@@ -109,14 +109,14 @@ def get_portfolio_value():
         parts = []
         for bot_name, meta in LIVE_BOTS.items():
             state = db.load_state(bot_name)
-            # Use 'or' not .get(key, default) — handles explicit None in DB
+            # Use 'or' not .get(key, default): handles explicit None in DB
             bal = float(state.get('balance') or meta['start'])
             total += bal
             parts.append(f'{bot_name}=${bal:.2f}')
         log(f'Portfolio breakdown: {" | ".join(parts)} = ${total:.2f}')
         return total
     except Exception as e:
-        log(f'DB read error: {e} — using starting capital fallback')
+        log(f'DB read error: {e}, using starting capital fallback')
         return LIVE_CAPITAL_START
 
 def get_exposure(portfolio_value):
@@ -149,7 +149,7 @@ def get_crypto_atr(pair, period=14):
         candles = r.json()
         if not candles or isinstance(candles, dict):
             return None, None
-        # [time, low, high, open, close, volume] — sort ascending
+        # [time, low, high, open, close, volume], sort ascending
         candles = sorted(candles, key=lambda x: x[0])
         closes = [float(c[4]) for c in candles]
         highs  = [float(c[2]) for c in candles]
@@ -244,7 +244,7 @@ def eval_trade(symbol, direction, capital, asset_class='equity'):
     regime, _, mult = get_regime()
     result['sizing_mult'] = mult
     if mult == 0.0:
-        result['reason'] = 'VIX PANIC — no new trades'
+        result['reason'] = 'VIX PANIC: no new trades'
         return result
 
     # 3. ATR sizing
@@ -262,7 +262,7 @@ def eval_trade(symbol, direction, capital, asset_class='equity'):
         raw = capital * 0.05
         size = max(MIN_POSITION_USD, min(raw * mult, capital * MAX_POSITION_PCT))
         result['approved'] = True
-        result['reason']   = 'ATR unavailable — flat 5% risk fallback'
+        result['reason']   = 'ATR unavailable: flat 5% risk fallback'
         result['suggested_size_usd'] = round(size, 2)
         return result
 
@@ -322,7 +322,7 @@ def check_drawdown(current_value, risk_state):
                risk_state.get('halt_reason', '').startswith('Drawdown'):
                 risk_state['halt_active'] = False
                 risk_state['halt_reason'] = None
-                log('Drawdown recovered — halt cleared')
+                log('Drawdown recovered; halt cleared')
     return risk_state
 
 # ── MAIN CRON UPDATE ──────────────────────────────────────────────────────────

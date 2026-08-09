@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-crypto_validator.py — Cryptocurrency Scam Detection Engine
+crypto_validator.py: Cryptocurrency Scam Detection Engine
 Deep Rock Holdings
 
 Usage:
@@ -76,7 +76,7 @@ def _get(url, params=None, timeout=12):
 
 
 def fetch_goplus(address, chain_id):
-    """GoPlus Security API — 30+ contract security vectors. Free, no key."""
+    """GoPlus Security API: 30+ contract security vectors. Free, no key."""
     if chain_id == "solana":
         url = "https://api.gopluslabs.io/api/v1/solana/token_security/"
     else:
@@ -89,7 +89,7 @@ def fetch_goplus(address, chain_id):
 
 
 def fetch_dexscreener(address):
-    """DexScreener — market data, liquidity, social links. Free, no key."""
+    """DexScreener: market data, liquidity, social links. Free, no key."""
     data = _get(f"https://api.dexscreener.com/latest/dex/tokens/{address}")
     if not data:
         return None
@@ -101,7 +101,7 @@ def fetch_dexscreener(address):
 
 
 def fetch_coingecko(address, ds_chain):
-    """CoinGecko — metadata + community data. Free tier, rate-limited."""
+    """CoinGecko: metadata + community data. Free tier, rate-limited."""
     cg_chain = DS_TO_CG.get(ds_chain)
     if not cg_chain:
         return None
@@ -150,7 +150,7 @@ def benford_chi2(values):
 def score_code(gp):
     """Contract security analysis. Returns (score 0–100, flags[], circuit_breaker bool)."""
     if gp is None:
-        return 50, ["[CODE] GoPlus data unavailable — defaulting to 50"], False
+        return 50, ["[CODE] GoPlus data unavailable: defaulting to 50"], False
 
     flags, score, breaker = [], 0, False
 
@@ -163,28 +163,28 @@ def score_code(gp):
 
     # ── Circuit breakers (force 100) ──
     if str(gp.get("is_honeypot", "0")) == "1":
-        F("🚨CRITICAL", "HONEYPOT — contract blocks all sell orders")
+        F("🚨CRITICAL", "HONEYPOT: contract blocks all sell orders")
         breaker = True
 
     if sell_tax >= 0.50:
-        F("🚨CRITICAL", f"Sell tax {sell_tax*100:.0f}% — functionally a honeypot")
+        F("🚨CRITICAL", f"Sell tax {sell_tax*100:.0f}%: functionally a honeypot")
         breaker = True
 
     # ── High risk (+25–40 pts) ──
     if str(gp.get("is_mintable", "0")) == "1" and not renounced:
-        F("🔴HIGH", "Mintable supply + ownership NOT renounced — infinite mint risk")
+        F("🔴HIGH", "Mintable supply + ownership NOT renounced: infinite mint risk")
         score += 40
 
     if str(gp.get("is_proxy", "0")) == "1" and str(gp.get("can_take_back_ownership", "0")) == "1":
-        F("🔴HIGH", "Upgradeable proxy + ownership active — silent backdoor upgrade risk")
+        F("🔴HIGH", "Upgradeable proxy + ownership active: silent backdoor upgrade risk")
         score += 35
 
     if str(gp.get("slippage_modifiable", "0")) == "1":
-        F("🔴HIGH", "Tax is dynamically modifiable by owner — can be raised to 100% trap")
+        F("🔴HIGH", "Tax is dynamically modifiable by owner: can be raised to 100% trap")
         score += 30
 
     if str(gp.get("is_blacklisted", "0")) == "1":
-        F("🔴HIGH", "Blacklisting capability — owner can freeze individual accounts")
+        F("🔴HIGH", "Blacklisting capability: owner can freeze individual accounts")
         score += 25
 
     if str(gp.get("is_airdrop_scam", "0")) == "1":
@@ -201,28 +201,28 @@ def score_code(gp):
 
     # ── Medium risk (+10–20 pts) ──
     if str(gp.get("is_open_source", "0")) == "0":
-        F("🟡MED", "Source code NOT verified — bytecode only, cannot audit logic")
+        F("🟡MED", "Source code NOT verified: bytecode only, cannot audit logic")
         score += 20
 
     if str(gp.get("anti_whale_modifiable", "0")) == "1":
-        F("🟡MED", "Anti-whale limits modifiable — can be removed to enable insider dumps")
+        F("🟡MED", "Anti-whale limits modifiable: can be removed to enable insider dumps")
         score += 10
 
     if str(gp.get("is_proxy", "0")) == "1" and str(gp.get("can_take_back_ownership", "0")) != "1":
-        F("🟡MED", "Proxy contract — implementation is swappable (renounced, lower risk)")
+        F("🟡MED", "Proxy contract: implementation is swappable (renounced, lower risk)")
         score += 8
 
     if str(gp.get("is_mintable", "0")) == "1" and renounced:
-        F("🟡MED", "Mintable supply (ownership renounced — lower risk but worth noting)")
+        F("🟡MED", "Mintable supply (ownership renounced, lower risk)")
         score += 8
 
     # ── Low / Info ──
     if not renounced:
-        F("ℹ️ LOW", f"Ownership active — owner: {owner[:12]}...")
+        F("ℹ️ LOW", f"Ownership active, owner: {owner[:12]}...")
         score += 5
 
     if str(gp.get("trading_cooldown", "0")) == "1":
-        F("ℹ️ LOW", "Trading cooldown enabled — limits rapid selling")
+        F("ℹ️ LOW", "Trading cooldown enabled: limits rapid selling")
 
     # Positives reduce score
     if renounced:
@@ -257,11 +257,11 @@ def score_liquidity(gp, dex):
 
     # ── Circuit breakers ──
     if dex and liq_usd < 5_000:
-        F("🚨CRITICAL", f"Liquidity ${liq_usd:,.0f} — critically shallow, extreme rug risk")
+        F("🚨CRITICAL", f"Liquidity ${liq_usd:,.0f}: critically shallow, extreme rug risk")
         score += 60
 
     if lp_holders and lp_locked_pct < 0.05:
-        F("🚨CRITICAL", f"LP locked: {lp_locked_pct*100:.1f}% — immediate rug pull risk")
+        F("🚨CRITICAL", f"LP locked: {lp_locked_pct*100:.1f}%, immediate rug pull risk")
         score += 55
 
     # ── High risk ──
@@ -270,34 +270,34 @@ def score_liquidity(gp, dex):
         score += 25
 
     if lp_holders and 0.05 <= lp_locked_pct < LP_LOCK_SAFE:
-        F("🔴HIGH", f"LP locked: {lp_locked_pct*100:.1f}% — below safe threshold ({LP_LOCK_SAFE*100:.0f}%)")
+        F("🔴HIGH", f"LP locked: {lp_locked_pct*100:.1f}%, below safe threshold ({LP_LOCK_SAFE*100:.0f}%)")
         score += 30
 
     # Wash trading proxy: buy/sell ratio anomaly
     if sells_24h > 0:
         ratio = buys_24h / sells_24h
         if ratio > 10:
-            F("🔴HIGH", f"Buy/sell ratio {ratio:.1f}× — extreme buy imbalance, possible wash trading or pump setup")
+            F("🔴HIGH", f"Buy/sell ratio {ratio:.1f}×: extreme buy imbalance, possible wash trading or pump setup")
             score += 25
         elif ratio > 5:
-            F("🟡MED", f"Buy/sell ratio {ratio:.1f}× — elevated imbalance, monitor for manipulation")
+            F("🟡MED", f"Buy/sell ratio {ratio:.1f}×: elevated imbalance, monitor for manipulation")
             score += 15
     elif buys_24h > 200 and sells_24h == 0:
-        F("🔴HIGH", "Zero sell transactions recorded — possible honeypot or wash trading")
+        F("🔴HIGH", "Zero sell transactions recorded: possible honeypot or wash trading")
         score += 30
 
     # Volume / liquidity ratio (volume >> pool = price manipulation ease)
     if liq_usd > 0 and vol_24h > liq_usd * 50:
-        F("🟡MED", f"Volume/Liquidity {vol_24h/liq_usd:.0f}× — pool too shallow to absorb volume naturally")
+        F("🟡MED", f"Volume/Liquidity {vol_24h/liq_usd:.0f}×: pool too shallow to absorb volume naturally")
         score += 15
 
     # ── No data ──
     if not lp_holders and gp:
-        F("🟡MED", "LP holder data unavailable — lock status unverifiable")
+        F("🟡MED", "LP holder data unavailable: lock status unverifiable")
         score += 10
 
     if not dex:
-        F("🟡MED", "No DEX pairs found — token may not be actively trading")
+        F("🟡MED", "No DEX pairs found: token may not be actively trading")
         score += 15
 
     # ── Positives ──
@@ -317,9 +317,9 @@ def score_liquidity(gp, dex):
 
 
 def score_entity(gp):
-    """Holder concentration analysis — Gini, HHI, whale detection. Returns (score, flags[])."""
+    """Holder concentration analysis: Gini, HHI, whale detection. Returns (score, flags[])."""
     if gp is None:
-        return 30, ["[ENT] No on-chain data — skipping concentration analysis"]
+        return 30, ["[ENT] No on-chain data: skipping concentration analysis"]
 
     flags, score = [], 0
     def F(sev, msg): flags.append(f"[ENT/{sev}] {msg}")
@@ -348,30 +348,30 @@ def score_entity(gp):
 
     # ── Circuit breaker ──
     if top1 > 0.50:
-        F("🚨CRITICAL", f"Top holder controls {top1*100:.1f}% of supply — majority control")
+        F("🚨CRITICAL", f"Top holder controls {top1*100:.1f}% of supply: majority control")
         score += 55
 
     # ── High risk ──
     if gini > GINI_EXTREME:
-        F("🔴HIGH", f"Gini {gini:.3f} — extreme centralization (threshold: {GINI_EXTREME})")
+        F("🔴HIGH", f"Gini {gini:.3f}: extreme centralization (threshold: {GINI_EXTREME})")
         score += 30
     elif gini > GINI_HIGH:
-        F("🟡MED", f"Gini {gini:.3f} — elevated centralization (partial data: top {len(shares)} holders)")
+        F("🟡MED", f"Gini {gini:.3f}: elevated centralization (partial data: top {len(shares)} holders)")
         score += 15
 
     if hhi > HHI_HIGH:
-        F("🔴HIGH", f"HHI {hhi:,.0f} — highly concentrated monopolistic distribution (>2500 = extreme)")
+        F("🔴HIGH", f"HHI {hhi:,.0f}: highly concentrated monopolistic distribution (>2500 = extreme)")
         score += 25
     elif hhi > HHI_MEDIUM:
-        F("🟡MED", f"HHI {hhi:,.0f} — moderately concentrated (1500–2500)")
+        F("🟡MED", f"HHI {hhi:,.0f}: moderately concentrated (1500–2500)")
         score += 10
 
     if 0.20 < top1 <= 0.50:
-        F("🟡MED", f"Top holder {top1*100:.1f}% — significant whale risk")
+        F("🟡MED", f"Top holder {top1*100:.1f}%: significant whale risk")
         score += 15
 
     if top5 > 0.80:
-        F("🔴HIGH", f"Top 5 holders combined: {top5*100:.1f}% — oligopolistic supply control")
+        F("🔴HIGH", f"Top 5 holders combined: {top5*100:.1f}%, oligopolistic supply control")
         score += 20
 
     # Creator still holding
@@ -392,7 +392,7 @@ def score_entity(gp):
         addr = (h.get("address") or "?")[:12] + "..."
         tag  = f" [{h['tag']}]" if h.get("tag") else ""
         lock = " 🔒" if str(h.get("is_locked", "0")) == "1" else ""
-        F("ℹ️ INFO", f"{addr}{tag}{lock} — {pct*100:.2f}%")
+        F("ℹ️ INFO", f"{addr}{tag}{lock}, {pct*100:.2f}%")
 
     if holder_count:
         F("ℹ️ INFO", f"Total unique holders: {holder_count:,}")
@@ -437,21 +437,21 @@ def score_social(dex, cg):
 
         if twitter_followers is not None:
             if twitter_followers < 500:
-                F("🔴HIGH", f"Twitter followers: {twitter_followers:,} — extremely thin for an active project")
+                F("🔴HIGH", f"Twitter followers: {twitter_followers:,}, extremely thin for an active project")
                 score += 30
             elif twitter_followers < 5_000:
-                F("🟡MED", f"Twitter followers: {twitter_followers:,} — low community size")
+                F("🟡MED", f"Twitter followers: {twitter_followers:,}, low community size")
                 score += 15
             else:
                 F("ℹ️ INFO", f"Twitter followers: {twitter_followers:,}")
 
         if telegram_users is not None and telegram_users < 100:
-            F("🟡MED", f"Telegram: {telegram_users:,} members — very thin community")
+            F("🟡MED", f"Telegram: {telegram_users:,} members, very thin community")
             score += 15
 
     # Social presence gaps
     if not has_twitter and not has_telegram:
-        F("🔴HIGH", "No social presence found (no Twitter or Telegram) — anonymous development")
+        F("🔴HIGH", "No social presence found (no Twitter or Telegram): anonymous development")
         score += 35
     elif not has_twitter:
         F("🟡MED", "No Twitter/X presence detected")
@@ -469,13 +469,13 @@ def score_social(dex, cg):
         s1    = int(txns1.get("sells", 0) or 0)
 
         if pc24 > 200 and b1 > s1 * 5:
-            F("🔴HIGH", f"Price +{pc24:.0f}% with buy-only 1h pressure — pump-and-dump pattern")
+            F("🔴HIGH", f"Price +{pc24:.0f}% with buy-only 1h pressure: pump-and-dump pattern")
             score += 25
         elif pc24 > 100:
-            F("🟡MED", f"Price +{pc24:.0f}% in 24h — unusual momentum, verify organic demand")
+            F("🟡MED", f"Price +{pc24:.0f}% in 24h: unusual momentum, verify organic demand")
             score += 10
         elif pc24 < -60:
-            F("🟡MED", f"Price {pc24:.0f}% in 24h — sharp decline, possible exit-scam aftermath")
+            F("🟡MED", f"Price {pc24:.0f}% in 24h: sharp decline, possible exit-scam aftermath")
             score += 10
 
     return min(100, score), flags
@@ -486,7 +486,7 @@ def score_social(dex, cg):
 def final_score(rc, rl, re, rs, breaker):
     """Composite weighted score with circuit-breaker override."""
     if breaker:
-        return 100, "CONFIRMED SCAM — DO NOT INVEST"
+        return 100, "CONFIRMED SCAM: DO NOT INVEST"
     score = round(rc * W_CODE + rl * W_LIQUIDITY + re * W_ENTITY + rs * W_SOCIAL)
     if score >= 80: verdict = "EXTREME RISK"
     elif score >= 60: verdict = "HIGH RISK"
@@ -534,7 +534,7 @@ def format_report(address, chain, fs, verdict, scores, flags, gp, dex, cg):
 
     L = []
     L.append("═" * 64)
-    L.append("   DEEP ROCK HOLDINGS — CRYPTO VALIDATOR")
+    L.append("   DEEP ROCK HOLDINGS: CRYPTO VALIDATOR")
     L.append("═" * 64)
     L.append(f"  Token:    {name} ({symbol})")
     L.append(f"  Chain:    {chain.upper()}")
@@ -663,7 +663,7 @@ def build_tg_message(address, chain, fs, verdict, scores, flags):
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 def main():
-    p = argparse.ArgumentParser(description="Crypto Scam Detector — Deep Rock Holdings")
+    p = argparse.ArgumentParser(description="Crypto Scam Detector: Deep Rock Holdings")
     p.add_argument("address",        help="Token contract address")
     p.add_argument("chain", nargs="?", default=None,
                    help="Chain: eth|bsc|base|polygon|arbitrum|avalanche|optimism|solana")
@@ -678,7 +678,7 @@ def main():
     print(f"\n  Analyzing {address[:22]}...{address[-6:]}")
     print(f"  {'─'*50}")
 
-    # Step 1: DexScreener — chain-agnostic, auto-detects chain
+    # Step 1: DexScreener, chain-agnostic, auto-detects chain
     print("  [1/4] DexScreener market data...")
     dex = fetch_dexscreener(address)
     if not chain and dex and dex.get("top"):
@@ -687,14 +687,14 @@ def main():
     if not chain:
         chain = "eth"
 
-    # Step 2: GoPlus — contract security
+    # Step 2: GoPlus, contract security
     gp_chain = DS_TO_GOPLUS.get(chain, "1")
     print(f"  [2/4] GoPlus security analysis (chain: {gp_chain})...")
     gp = fetch_goplus(address, gp_chain)
     if gp is None:
-        print("        ⚠️  GoPlus returned no data — token may be unlisted or invalid address")
+        print("        ⚠️  GoPlus returned no data: token may be unlisted or invalid address")
 
-    # Step 3: CoinGecko — community + social metadata
+    # Step 3: CoinGecko, community + social metadata
     cg = None
     if not args.no_coingecko:
         print("  [3/4] CoinGecko metadata...")

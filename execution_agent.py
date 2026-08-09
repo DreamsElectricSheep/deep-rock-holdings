@@ -1,6 +1,6 @@
 #!/home/hedgefund/.openclaw/workspace/venv/bin/python3
 """
-Execution Agent — Deep Rock Holdings
+Execution Agent: Deep Rock Holdings
 Centralized order routing with risk gate.
 
 Routes to: Coinbase (ccxt) | Jupiter (Solana) | Alpaca (equities, paper)
@@ -78,7 +78,7 @@ def _coinbase_keys():
 def _execute_coinbase(bot_name, symbol, direction, size_usd, dry_run=False):
     """
     Market order on Coinbase via ccxt.
-    symbol: ccxt format — 'ETH/USDC', 'SOL/USDC', 'BTC/USDC'
+    symbol: ccxt format, e.g. 'ETH/USDC', 'SOL/USDC', 'BTC/USDC'
     """
     import ccxt
     api_key, api_secret = _coinbase_keys()
@@ -231,7 +231,7 @@ def _execute_jupiter(bot_name, direction, size_usd, dry_run=False):
 def _execute_alpaca(bot_name, symbol, direction, size_usd, dry_run=False):
     """
     Notional dollar order on Alpaca (paper mode only until keys regenerated).
-    symbol: plain ticker — 'NVDA', 'AAPL', etc.
+    symbol: plain ticker, e.g. 'NVDA', 'AAPL', etc.
     """
     if dry_run:
         log(f'[DRY RUN] {direction} ${size_usd:.2f} of {symbol} via Alpaca (paper={ALPACA_PAPER_MODE})')
@@ -246,7 +246,7 @@ def _execute_alpaca(bot_name, symbol, direction, size_usd, dry_run=False):
         with open(os.path.expanduser('~/.config/alpaca/keys.json')) as f:
             keys = json.load(f)
         if not keys.get('api_key') or keys.get('api_key') == 'YOUR_KEY':
-            return {'success': False, 'error': 'Alpaca keys not configured — regenerate at alpaca.markets'}
+            return {'success': False, 'error': 'Alpaca keys not configured: regenerate at alpaca.markets'}
     except Exception as e:
         return {'success': False, 'error': f'Alpaca keys load error: {e}'}
 
@@ -263,7 +263,7 @@ def _execute_alpaca(bot_name, symbol, direction, size_usd, dry_run=False):
                     time_in_force=TimeInForce.DAY,
                 ))
             except Exception:
-                # No position — try notional sell anyway
+                # No position, try notional sell anyway
                 order = client.submit_order(MarketOrderRequest(
                     symbol=symbol, notional=round(size_usd, 2),
                     side=OrderSide.SELL, time_in_force=TimeInForce.DAY,
@@ -289,13 +289,13 @@ def execute_trade(bot_name, symbol, direction, capital, asset_class, exchange_ty
     Execute a trade through the appropriate exchange with risk gate.
 
     Args:
-        bot_name     : str   — calling bot name (for DB logging + Telegram)
-        symbol       : str   — 'ETH/USDC', 'SOL-USD', 'NVDA', etc.
-        direction    : str   — 'BUY' or 'SELL'
-        capital      : float — available capital for this bot (USD)
-        asset_class  : str   — 'crypto' or 'equity'
-        exchange_type: str   — 'coinbase' | 'jupiter' | 'alpaca'
-        dry_run      : bool  — if True skip actual exchange calls
+        bot_name     : str   : calling bot name (for DB logging + Telegram)
+        symbol       : str   : 'ETH/USDC', 'SOL-USD', 'NVDA', etc.
+        direction    : str   : 'BUY' or 'SELL'
+        capital      : float : available capital for this bot (USD)
+        asset_class  : str   : 'crypto' or 'equity'
+        exchange_type: str   : 'coinbase' | 'jupiter' | 'alpaca'
+        dry_run      : bool  : if True skip actual exchange calls
 
     Returns dict:
         success, order_id, price, size_usd,
@@ -317,10 +317,10 @@ def execute_trade(bot_name, symbol, direction, capital, asset_class, exchange_ty
         result['size_usd']         = risk['suggested_size_usd']
         if not risk['approved']:
             result['error'] = f'Risk gate blocked: {risk["reason"]}'
-            log(f'[{bot_name}] BLOCKED — {risk["reason"]}')
+            log(f'[{bot_name}] BLOCKED: {risk["reason"]}')
             return result
     except Exception as e:
-        log(f'Risk manager error: {e} — using 5% capital fallback')
+        log(f'Risk manager error: {e}, using 5% capital fallback')
         result['size_usd']         = round(capital * 0.05, 2)
         result['approved_by_risk'] = True
         result['risk_reason']      = f'risk_manager unavailable: {e}'

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-config.py — Deep Rock Holdings shared configuration
+config.py: Deep Rock Holdings shared configuration
 Reads sensitive values from ~/.config/deeprock/secrets.json
-Never hardcode tokens/passwords in scripts — import from here instead.
+Never hardcode tokens/passwords in scripts; import from here instead.
 """
 import json, os
 
